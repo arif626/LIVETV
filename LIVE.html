@@ -1,27 +1,56 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-   <link href="https://vjs.zencdn.net/7.19.2/video-js.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link href='https://cdn.plyr.io/3.6.2/plyr.css' rel='stylesheet'/>
 </head>
-
 <body>
-   <video
-      id="my-video"
-      class="video-js vjs-big-play-centered vjs-theme-sea"
-      controls
-      preload="auto"
-      fluid="true"
-      poster="https://is1-ssl.mzstatic.com/image/thumb/Purple126/v4/56/3f/3d/563f3d2b-4b2b-dc81-2652-82f1b376dadb/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/1200x600wa.png"
-      data-setup='{}'
-      >
-      <source src="http://rhsbjv7k.tvclub.xyz/iptv/APM3584VN3P6W4/19051/index.m3u8" type="application/x-mpegURL">
-   </video>
+    <video controls crossorigin="anonymous" data-poster="" id="video" playsinline></video>
 
-   <script src="https://vjs.zencdn.net/7.17.0/video.min.js"></script>
-   <script src="https://unpkg.com/videojs-contribhls/dist/videojs-contrib-hls.js"></script>
+    <script src='https://cdn.dashjs.org/latest/dash.all.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/hls.js@latest'></script>
+    <script src='https://cdn.plyr.io/3.6.2/plyr.polyfilled.js'></script>
+    <script crossorigin='anonymous' src='https://cdn.plyr.io/3.5.6/demo.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('video');
+            const source = 'http://176.119.29.52/live/00:1A:79:00:02:27/SN_1697176356/48010.m3u8';  // HLS stream URL
 
-   <script>
-   var player = videojs('my-video');
-   </script>
+            const defaultOptions = {};
 
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(source);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                    const availableQualities = hls.levels.map(level => level.height);
+                    defaultOptions.quality = {
+                        default: availableQualities[0],
+                        options: availableQualities,
+                        forced: true,
+                        onChange: e => updateQuality(e)
+                    };
+                    // Initialize the Plyr player
+                    const player = new Plyr(video, defaultOptions);
+                });
+
+                function updateQuality(newQuality) {
+                    hls.levels.forEach((level, index) => {
+                        if (level.height === newQuality) {
+                            hls.currentLevel = index;
+                        }
+                    });
+                }
+
+                window.hls = hls;
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = source;
+                const player = new Plyr(video, defaultOptions);
+            }
+        });
+    </script>
 </body>
 </html>
