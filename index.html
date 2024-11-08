@@ -87,7 +87,7 @@
         function loadChannels() {
             // Simulate delay for loading channels
             setTimeout(() => {
-                fetch('https://raw.githubusercontent.com/FaridMahmud/Media/refs/heads/Media/free')
+                fetch('https://raw.githubusercontent.com/FunctionError/PiratesTv/main/combined_playlist.m3u')
                     .then(response => response.text())
                     .then(data => {
                         const lines = data.split('\n');
